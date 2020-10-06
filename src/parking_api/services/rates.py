@@ -1,8 +1,7 @@
 from parking_api.database.models import Rate
-from parking_api.exceptions import ApiException
+from parking_api.exceptions import ApiException, ApiClientException
 from parking_api.exceptions.rates import MixedTimezonesInRates
 from parking_api.exceptions.datetime import InvalidTimezoneString
-from parking_api.repositories.rates import RatesRepository
 from parking_api.services.datetime import DateTimeService
 from typing import Optional
 import re
@@ -38,11 +37,11 @@ class RatesService(object):
             days = rate.get('days').split(',')
             raw_times = rate.get('times')
             if bool(re.match(r'^\d{4}\-\d{4}$', raw_times)) is False:
-                raise ApiException(f"Invalid times specified: {raw_times}")
+                raise ApiClientException(f"Invalid times specified: {raw_times}")
             times = [r[:2] + ':' + r[2:] + ':00' for r in raw_times.split('-')]
             for day in days:
                 if day not in days_of_week:
-                    raise ApiException(f"Invalid day name: {day}")
+                    raise ApiClientException(f"Invalid day name: {day}")
                 new_rate = Rate(days_of_week[day], times[0], times[1], timezone, rate.get('price'))
                 parsed_rates.append(new_rate)
             last_timezone = timezone
@@ -56,17 +55,22 @@ class RatesService(object):
         return self.repository.get_all_rates()
 
     def get_primary_timezone(self):
-        return self.repository.get_rates_timezone()
+        primary_timezone = self.repository.get_rates_timezone()
+
+        if primary_timezone is None:
+            raise ApiException('There are no rates available!')
+
+        return primary_timezone
 
     def find_rate(self, target_tz: str, date_from: str, date_to: str) -> Optional[Rate]:
         try:
             date_from_in_target_tz = datetime_service.parse_iso8601_date_to_target_timezone(date_from, target_tz)
         except ValueError:
-            raise ApiException(f"Invalid 'from' date specified: {date_from}")
+            raise ApiClientException(f"Invalid 'from' date specified: {date_from}")
         try:
             date_to_in_target_tz = datetime_service.parse_iso8601_date_to_target_timezone(date_to, target_tz)
         except ValueError:
-            raise ApiException(f"Invalid 'to' date specified: {date_to}")
+            raise ApiClientException(f"Invalid 'to' date specified: {date_to}")
 
         if (date_from_in_target_tz.year != date_to_in_target_tz.year
                 or date_from_in_target_tz.month != date_to_in_target_tz.month

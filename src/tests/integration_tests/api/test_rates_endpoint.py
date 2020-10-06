@@ -5,9 +5,10 @@ import os
 
 @pytest.mark.usefixtures('client_class')
 class TestRatesEndpoint:
+    RATES_ENDPOINT = '/api/rates/'
 
     def test_rates_submission_with_invalid_days(self):
-        res = self.client.put('/api/rates/', json={
+        res = self.client.put(self.RATES_ENDPOINT, json={
             "rates": [
                 {
                     "days": "monoday,tues,thurs",
@@ -23,7 +24,7 @@ class TestRatesEndpoint:
 
     def test_rates_submission_with_invalid_times(self):
         invalid_times = "09001-2100"
-        res = self.client.put('/api/rates/', json={
+        res = self.client.put(self.RATES_ENDPOINT, json={
             "rates": [
                 {
                     "days": "mon,tues,thurs",
@@ -39,7 +40,7 @@ class TestRatesEndpoint:
 
     def test_rates_submission_with_invalid_timezone(self):
         invalid_timezone = "Neverland/Neverland"
-        res = self.client.put('/api/rates/', json={
+        res = self.client.put(self.RATES_ENDPOINT, json={
             "rates": [
                 {
                     "days": "mon,tues,thurs",
@@ -54,7 +55,7 @@ class TestRatesEndpoint:
         assert expected == res.get_json()
 
     def test_rates_submission_with_mixed_timezones(self):
-        res = self.client.put('/api/rates/', json={
+        res = self.client.put(self.RATES_ENDPOINT, json={
             "rates": [
                 {
                     "days": "mon,tues,thurs",

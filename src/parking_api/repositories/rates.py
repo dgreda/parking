@@ -9,6 +9,9 @@ class RatesRepository(object):
     def get_rates_timezone(self):
         rate = Rate.query.first()
 
+        if rate is None:
+            return None
+
         return rate.timezone
 
     def update_rates_in_db(self, rates):

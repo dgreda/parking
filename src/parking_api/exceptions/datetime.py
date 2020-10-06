@@ -1,6 +1,6 @@
-from parking_api.exceptions import ApiException
+from parking_api.exceptions import ApiClientException
 
-class InvalidTimezoneString(ApiException):
+class InvalidTimezoneString(ApiClientException):
     def __init__(self, timezone, message="Invalid Timezone string provided: "):
         self.timezone = timezone
         self.message = message + timezone

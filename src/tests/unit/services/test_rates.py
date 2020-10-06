@@ -1,4 +1,4 @@
-from parking_api.exceptions import ApiException
+from parking_api.exceptions import ApiClientException
 from parking_api.services.rates import RatesService
 from unittest.mock import MagicMock
 import pytest
@@ -12,9 +12,9 @@ def rates_service():
 class TestRates:
 
     def test_find_rate_throws_exception_on_invalid_date(self, rates_service):
-        with pytest.raises(ApiException):
+        with pytest.raises(ApiClientException):
             rates_service.find_rate('America/Chicago', 'garbage', '2020-09-01T12:00:00-05:00')
-        with pytest.raises(ApiException):
+        with pytest.raises(ApiClientException):
             rates_service.find_rate('America/Chicago', '2020-09-01T12:00:00-05:00', '2020-09-01T12:00:00-05:00wrong')
 
     def test_find_rate(self, rates_service):

@@ -7,22 +7,27 @@ import os
 class TestRatesQuoteEndpoint:
     QUOTE_ENDPOINT = '/api/rates/quote'
 
-    def test_invalid_quote_requests(self):
-        invalid_date = 'textthatisclearlynotadate+00:00'
-        res = self.client.post(self.QUOTE_ENDPOINT, json={
-            'from': invalid_date,
-            'to': '2015-07-01T12:00:00-05:00'
-        })
-        assert res.status_code == 422
-        assert {'message': "Invalid 'from' date specified: " + invalid_date} == res.get_json()
+    def test_invalid_quote_requests(self, database):
+        with open(os.path.dirname(__file__) + '/../fixtures/rates.json') as f:
+            rates = json.load(f)
+            res = self.client.put('/api/rates/', json=rates)
+            assert res.status_code == 204
 
-        invalid_date = '2015-07-01Tgarbage12:00:00-05:00'
-        res = self.client.post(self.QUOTE_ENDPOINT, json={
-            'from': '2015-07-01T12:00:00-05:00',
-            'to': invalid_date
-        })
-        assert res.status_code == 422
-        assert {'message': "Invalid 'to' date specified: " + invalid_date} == res.get_json()
+            invalid_date = 'textthatisclearlynotadate+00:00'
+            res = self.client.post(self.QUOTE_ENDPOINT, json={
+                'from': invalid_date,
+                'to': '2015-07-01T12:00:00-05:00'
+            })
+            assert res.status_code == 422
+            assert {'message': "Invalid 'from' date specified: " + invalid_date} == res.get_json()
+
+            invalid_date = '2015-07-01Tgarbage12:00:00-05:00'
+            res = self.client.post(self.QUOTE_ENDPOINT, json={
+                'from': '2015-07-01T12:00:00-05:00',
+                'to': invalid_date
+            })
+            assert res.status_code == 422
+            assert {'message': "Invalid 'to' date specified: " + invalid_date} == res.get_json()
 
     def test_quotes(self, database):
         with open(os.path.dirname(__file__) + '/../fixtures/rates.json') as f:
