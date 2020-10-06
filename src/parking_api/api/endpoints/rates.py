@@ -3,7 +3,7 @@ import logging
 from flask import request
 from flask_restx import Resource
 from parking_api.api.restx import api
-from parking_api.api.serializers import rate, rates_collection, quote_request, quote
+from parking_api.api.serializers import rate, rates_collection, quote_request, quote, quote_unavailable
 from parking_api.repositories.rates import RatesRepository
 from parking_api.services.rates import RatesService
 
@@ -75,10 +75,10 @@ class RatesCollection(Resource):
 @ns.route('/quote')
 class RatesCollection(Resource):
 
-    @api.response(200, 'OK')
+    @api.response(200, 'Success', quote)
+    @api.response(404, 'Not Found', quote_unavailable)
     @api.response(422, 'Unprocessable Entity')
     @api.expect(quote_request)
-    @api.marshal_with(quote)
     def post(self):
         """
         Returns parking rate quote for requested datetimes.
@@ -99,4 +99,4 @@ class RatesCollection(Resource):
         if rate is not None:
             return {'rate': rate.price}, 200
         else:
-            return {'rate': 'unavailable'}, 200
+            return {'rate': 'unavailable'}, 404

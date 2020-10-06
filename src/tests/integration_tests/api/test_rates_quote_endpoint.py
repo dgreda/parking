@@ -48,5 +48,5 @@ class TestRatesQuoteEndpoint:
                 'from': '2015-07-04T07:00:00+05:00',
                 'to': '2015-07-04T20:00:00+05:00'
             })
-            assert res.status_code == 200
+            assert res.status_code == 404
             assert {'rate': 'unavailable'} == res.get_json()

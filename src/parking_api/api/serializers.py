@@ -9,14 +9,20 @@ rate = api.model('Rate', {
 })
 
 rates_collection = api.model('RatesCollection', {
-    'rates': fields.List(fields.Nested(rate))
+    'rates': fields.List(fields.Nested(rate), required=True)
 })
 
 quote_request = api.model('QuoteRequest', {
-    'from': fields.DateTime(required=True, description='Timezone aware ISO-8601 datetime, e.g.: "2015-07-01T07:00:00-05:00"'),
-    'to': fields.DateTime(required=True, description='Timezone aware ISO-8601 datetime, e.g.: "2015-07-01T12:00:00-05:00"'),
+    'from': fields.DateTime(required=True,
+                            description='Timezone aware ISO-8601 datetime, e.g.: "2015-07-01T07:00:00-05:00"'),
+    'to': fields.DateTime(required=True,
+                          description='Timezone aware ISO-8601 datetime, e.g.: "2015-07-01T12:00:00-05:00"'),
 })
 
 quote = api.model('Quote', {
-    'rate': fields.Raw(required=True),
+    'rate': fields.Integer(description='Returns quoted parking rate as an integer'),
+})
+
+quote_unavailable = api.model('QuoteUnavailable', {
+    'rate': fields.String(description='Returns value "unavailable" when no single valid rate could be found'),
 })
