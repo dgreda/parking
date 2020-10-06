@@ -11,7 +11,7 @@ logging_file_postfix = os.getenv("APP_ENV", "")
 if logging_file_postfix != "":
     logging_file_postfix = '_' + logging_file_postfix
 logging_conf_path = os.path.normpath(
-    os.path.join(os.path.dirname(__file__), f"../../../logging{logging_file_postfix}.conf"))
+    os.path.join(os.path.dirname(__file__), f"../../logging{logging_file_postfix}.conf"))
 
 logging.config.fileConfig(logging_conf_path)
 log = logging.getLogger(__name__)

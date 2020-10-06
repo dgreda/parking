@@ -26,13 +26,13 @@ services:
     build: ./
     command: pytest
     ports:
-      - "5000:5000"
+      - "5001:5000"
     volumes:
       - ./src:/code/src
     depends_on:
       - db-test
     links:
-      - db:db-test
+      - db-test:db-test
     env_file:
       - ./.env.test
 

@@ -1,6 +1,6 @@
 from flask.cli import FlaskGroup
 
-from parking_api.app import app
+from parking_api import app
 from parking_api.database import db
 
 cli = FlaskGroup(app)

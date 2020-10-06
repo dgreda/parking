@@ -4,13 +4,14 @@ from flask import request
 from flask_restx import Resource
 from parking_api.api.restx import api
 from parking_api.api.serializers import rate, rates_collection, quote_request, quote
+from parking_api.repositories.rates import RatesRepository
 from parking_api.services.rates import RatesService
 
 log = logging.getLogger(__name__)
 
 ns = api.namespace('rates', description='Operations related to parking rates')
 
-rates_service = RatesService()
+rates_service = RatesService(RatesRepository())
 
 
 @ns.route('/')

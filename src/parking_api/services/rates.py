@@ -1,8 +1,8 @@
-from parking_api.database import db
 from parking_api.database.models import Rate
 from parking_api.exceptions import ApiException
 from parking_api.exceptions.rates import MixedTimezonesInRates
 from parking_api.exceptions.datetime import InvalidTimezoneString
+from parking_api.repositories.rates import RatesRepository
 from parking_api.services.datetime import DateTimeService
 from typing import Optional
 import re
@@ -22,6 +22,10 @@ datetime_service = DateTimeService()
 
 
 class RatesService(object):
+
+    def __init__(self, repository):
+        self.repository = repository
+
     def parse_rates(self, rates):
         parsed_rates = []
         last_timezone = None
@@ -33,7 +37,7 @@ class RatesService(object):
                 raise MixedTimezonesInRates
             days = rate.get('days').split(',')
             raw_times = rate.get('times')
-            if bool(re.match("^\d{4}\-\d{4}$", raw_times)) is False:
+            if bool(re.match(r'^\d{4}\-\d{4}$', raw_times)) is False:
                 raise ApiException(f"Invalid times specified: {raw_times}")
             times = [r[:2] + ':' + r[2:] + ':00' for r in raw_times.split('-')]
             for day in days:
@@ -46,22 +50,13 @@ class RatesService(object):
         return parsed_rates
 
     def update_rates_in_db(self, new_rates):
-        current_rates = Rate.query.all()
-        for current_rate in current_rates:
-            db.session.delete(current_rate)
-
-        for rate in new_rates:
-            db.session.add(rate)
-
-        db.session.commit()
+        self.repository.update_rates_in_db(new_rates)
 
     def get_all_rates(self):
-        return Rate.query.all()
+        return self.repository.get_all_rates()
 
     def get_primary_timezone(self):
-        rate = Rate.query.first()
-
-        return rate.timezone
+        return self.repository.get_rates_timezone()
 
     def find_rate(self, target_tz: str, date_from: str, date_to: str) -> Optional[Rate]:
         try:
@@ -83,4 +78,4 @@ class RatesService(object):
         time_from = date_from_in_target_tz.strftime('%H:%M')
         time_to = date_to_in_target_tz.strftime('%H:%M')
 
-        return Rate.query.filter(Rate.weekday == weekday, Rate.time_from <= time_from, Rate.time_to >= time_to).first()
+        return self.repository.find_rate(weekday, time_from, time_to)
