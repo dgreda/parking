@@ -1,0 +1,47 @@
+version: '3'
+services:
+  api:
+    build: ./
+    command: python manage.py run -h 0.0.0.0
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./src:/code/src
+    depends_on:
+      - db
+    links:
+      - db:db
+    env_file:
+      - ./.env
+  db:
+    image: postgres:12-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: parking_quotes
+
+  api-test:
+    build: ./
+    command: pytest
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./src:/code/src
+    depends_on:
+      - db-test
+    links:
+      - db:db-test
+    env_file:
+      - ./.env.test
+
+  db-test:
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_USER: postgres_test
+      POSTGRES_PASSWORD: postgres_test
+      POSTGRES_DB: parking_quotes_test
+
+volumes:
+  postgres_data:
